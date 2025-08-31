@@ -1,9 +1,9 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
-
+import 'package:galleria_app/screens/home_page.dart';
+import 'package:galleria_app/screens/profile_screen.dart';
 import '../constant/app_constant.dart';
 
-//type stw, select the first stateful widget template
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -12,43 +12,37 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-
   int _pageIndex = 0;
-  final _pages = [
-    Center(child: Text('Home Page', style: headingTextStyle)),
-    Center(child: Text('Search Page', style: headingTextStyle)),    
+
+  final pages = [
+    HomePage(),
+    Center(child: Text('Search Page', style: headingTextStyle)),
     Center(child: Text('Notifications Page', style: headingTextStyle)),
-    Center(child: Text('Profile Page', style: headingTextStyle)),
+    ArtistProfileScreen()
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-
-      body: _pages[_pageIndex],
-
-  
       bottomNavigationBar: CurvedNavigationBar(
-        backgroundColor: Colors.transparent,
-        color: primaryColor,
-        animationDuration: const Duration(milliseconds: 300), //This will make it faster and more smooth
-
-        items: [
-          Icon(Icons.home, size: 30, color: secondaryColor),
-          Icon(Icons.search, size: 30, color: secondaryColor),
-          Icon(Icons.notifications, size: 30, color: secondaryColor),
-          Icon(Icons.person, size: 30, color: secondaryColor),
+        index: _pageIndex,
+        height: 60,
+        backgroundColor: Colors.white,
+        color: Colors.blue,
+        items: const [
+          Icon(Icons.home, color: Colors.white),
+          Icon(Icons.search, color: Colors.white),
+          Icon(Icons.notifications, color: Colors.white),
+          Icon(Icons.person, color: Colors.white),
         ],
-
         onTap: (index) {
-          // Handle navigation logic here
           setState(() {
             _pageIndex = index;
           });
         },
-
-        ),
+      ),
+      body: pages[_pageIndex],
     );
   }
 }
