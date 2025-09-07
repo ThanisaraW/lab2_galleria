@@ -1,102 +1,276 @@
 import 'package:flutter/material.dart';
+import 'package:introduction_screen/introduction_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:galleria_app/screens/home_screen.dart';
 
-class IntroScreen extends StatelessWidget {
-  const IntroScreen({super.key});
+class IntroScreen extends StatefulWidget {
+  @override
+  _IntroScreenState createState() => _IntroScreenState();
+}
+
+class _IntroScreenState extends State<IntroScreen> {
+  final PageController _pageController = PageController();
+  int _currentPage = 0;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Color(0xFFF5F7FA),
       body: SafeArea(
         child: Column(
           children: [
-            const SizedBox(height: 32),
-            const Text(
-              "Introduction Screen",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
-            ),
-            const SizedBox(height: 24),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: Image.asset(
-                'assets/images/doctor.jpg', // Change to your image path
-                height: 160,
-                width: 160,
-                fit: BoxFit.cover,
-              ),
-            ),
-            const SizedBox(height: 32),
-            const Text(
-              "First Page",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-            ),
-            const SizedBox(height: 10),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 32),
-              child: Text(
-                "Here you can have whatever description/you would like.",
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 15, color: Colors.black54),
-              ),
-            ),
-            const Spacer(),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey[200],
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+            // Header
+            SizedBox(height: 20),
+            
+            // Page view with cards
+            Expanded(
+              child: PageView(
+                controller: _pageController,
+                onPageChanged: (index) {
+                  setState(() {
+                    _currentPage = index;
+                  });
+                },
+                children: [
+                  _buildCardPage(
+                    title: 'Discover Art \nToys',
+                    subtitle: 'Explore amazing creations from \ntalented artists and passionate collectors around the world. \nFind your next treasure.',
+                    imagePath: 'assets/images/intropic/post1.png',
                   ),
-                  minimumSize: const Size(double.infinity, 44),
-                ),
-                onPressed: () {},
-                child: const Text(
-                  "Let's go.",
-                  style: TextStyle(
-                    color: Colors.blue,
-                    fontWeight: FontWeight.bold,
+                  _buildCardPage(
+                    title: 'Track Your \nCollection',
+                    subtitle: 'Organize and save details of your precious toys. Keep track \nof artists, purchase dates, \nand special memories',
+                    imagePath: 'assets/images/intropic/post2.png',
                   ),
-                ),
+                  _buildCardPage(
+                    title: 'Rate & Connect',
+                    subtitle: 'Share your thoughts, leave reviews, \nand connect with fellow art toy enthusiasts in our vibrant community.',
+                    imagePath: 'assets/images/intropic/post3.jpeg',
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _Dot(selected: true),
-                _Dot(selected: false),
-                _Dot(selected: false),
-              ],
+            
+            // Bottom navigation
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 30, vertical: 30),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Left side - Skip button
+                  GestureDetector(
+                    onTap: () => _onSkip(),
+                    child: Text(
+                      'Skip',
+                      style: TextStyle(
+                        color: Colors.grey.shade600,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  
+                  // Center - page indicator
+                  Row(
+                    children: List.generate(3, (index) {
+                      return Container(
+                        margin: EdgeInsets.symmetric(horizontal: 4),
+                        width: index == _currentPage ? 20 : 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: index == _currentPage 
+                              ? Colors.black87 
+                              : Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      );
+                    }),
+                  ),
+                  
+                  // Right side - next/get started button
+                  GestureDetector(
+                    onTap: () {
+                      if (_currentPage < 2) {
+                        _pageController.nextPage(
+                          duration: Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        );
+                      } else {
+                        _onDone();
+                      }
+                    },
+                    child: Container(
+                      width: 50,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.1),
+                            blurRadius: 10,
+                            offset: Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        _currentPage < 2 ? Icons.arrow_forward_ios : Icons.check,
+                        color: Colors.black87,
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 16),
-            TextButton(
-              onPressed: () {},
-              child: const Text("Skip", style: TextStyle(color: Colors.grey)),
-            ),
-            const SizedBox(height: 8),
           ],
         ),
       ),
     );
   }
-}
 
-class _Dot extends StatelessWidget {
-  final bool selected;
-  const _Dot({required this.selected});
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildCardPage({
+    required String title,
+    required String subtitle,
+    required String imagePath,
+  }) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 4),
-      width: selected ? 12 : 8,
-      height: selected ? 12 : 8,
-      decoration: BoxDecoration(
-        color: selected ? Colors.blue : Colors.red,
-        shape: BoxShape.circle,
+      margin: EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(30),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.2),
+              blurRadius: 20,
+              offset: Offset(0, 10),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(30),
+          child: Stack(
+            children: [
+              // Background image
+              Positioned.fill(
+                child: Image.asset(
+                  imagePath,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    // Fallback if image not found
+                    return Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Color(0xFF4ECDC4),
+                            Color(0xFF44A08D),
+                          ],
+                        ),
+                      ),
+                      child: Center(
+                        child: Icon(
+                          Icons.image,
+                          size: 80,
+                          color: Colors.white.withValues(alpha: 0.8),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              
+              // Blur overlay
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                ),
+              ),
+              
+              // Main content
+              Padding(
+                padding: EdgeInsets.all(40),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: 60),
+                    
+                    // Spacer for content positioning
+                    Expanded(
+                      flex: 2,
+                      child: SizedBox(),
+                    ),
+                    
+                    SizedBox(height: 20),
+                    
+                    // Title
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        height: 1.2,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black.withValues(alpha: 0.3),
+                            offset: Offset(1, 1),
+                            blurRadius: 3,
+                          ),
+                        ],
+                      ),
+                    ),
+                    
+                    SizedBox(height: 16),
+                    
+                    // Subtitle
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.white.withOpacity(0.9),
+                        height: 1.4,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black.withOpacity(0.3),
+                            offset: Offset(1, 1),
+                            blurRadius: 3,
+                          ),
+                        ],
+                      ),
+                    ),
+                    
+                    SizedBox(height: 40),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
+    );
+  }
+
+  void _onSkip() {
+    // Navigate to the last page instead of finishing
+    _pageController.animateToPage(
+      2, // Go to page 3 (index 2)
+      duration: Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  void _onDone() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('ON_BOARDING', false);
+    // Navigate to home page after completing onboarding
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const HomeScreen()),
     );
   }
 }

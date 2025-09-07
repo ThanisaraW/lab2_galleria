@@ -46,7 +46,7 @@ class ArtistProfileScreen extends StatelessWidget {
     ArtToyData(
       id: 'kuromi_rose_1',
       image: 'assets/images/dream_rosegarden/dream_rosegarden_1.jpg',
-      name: 'Kuromi Dream Rose Garden Mini',
+      name: 'Kuromi Rose Garden',
       artist: 'Sanrio / Central Department Store',
       favorites: 987,
       collectors: '1.2k',
@@ -68,7 +68,7 @@ class ArtistProfileScreen extends StatelessWidget {
     ArtToyData(
       id: 'kuromi_witch_1',
       image: 'assets/images/witch_feast/witch_feast_1.jpg',
-      name: 'Kuromi The Witch\'s Feast',
+      name: 'Kuromi Witch\'s Feast',
       artist: 'TOPTOY Studio',
       favorites: 1450,
       collectors: '1.8k',
@@ -91,269 +91,300 @@ class ArtistProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Column( 
-          children: [
-            // Top bar
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Icon(Icons.arrow_back_ios_new_rounded, size: 22),
-                  Text("Profile", style: headingTextStyle),
-                  Icon(Icons.more_vert, size: 24),
-                ],
-              ),
-            ),
-            
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    const SizedBox(height: 20),
-                    
-                    // Artist Avatar
-                    CircleAvatar(
-                      radius: 55,
-                      backgroundColor: Colors.grey[100],
-                      backgroundImage: AssetImage('assets/images/avatar/profile.png'),
-                      onBackgroundImageError: (exception, stackTrace) {
-                        // Handle image load error
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    
-                    // Artist Name & Title
-                    Text(
-                      "Guinea P.",
-                      style: headingTextStyle.copyWith(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    
-                    Text(
-                      "Enthusiast",
-                      style: TextStyle(
-                        color: Colors.grey[600], 
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    
-                    // Bio
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 32),
-                      child: Text(
-                        "Based in Bangkok. Love everything gothic, cute, and rebellious!",
-                        style: TextStyle(
-                          color: Colors.grey[700], 
-                          fontSize: 14,
-                          height: 1.5,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    
-                    // Stats Row
-                    Container(
-                      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
-                      margin: const EdgeInsets.symmetric(horizontal: 20),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.05),
-                            blurRadius: 10,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          _StatItem(count: "2", label: "Collection"),
-                          _StatDivider(),
-                          _StatItem(count: "3", label: "Years"),
-                          _StatDivider(),
-                          _StatItem(count: "12", label: "Wishlist"),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    
-                    // Action Buttons
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: () {},
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.black87,
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                padding: const EdgeInsets.symmetric(vertical: 16),
-                                elevation: 0,
-                              ),
-                              child: Text("Edit Profile", style: TextStyle(fontWeight: FontWeight.w600)),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: OutlinedButton(
-                              onPressed: () {},
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: Colors.black87,
-                                side: BorderSide(color: Colors.grey[300]!),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                padding: const EdgeInsets.symmetric(vertical: 16),
-                              ),
-                              child: Text("Share", style: TextStyle(fontWeight: FontWeight.w600)),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-                    
-                    // Tabs Section - ใช้ SizedBox แทน Container และเพิ่ม height ที่เหมาะสม
-                    SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.6, // ใช้ responsive height
-                      child: DefaultTabController(
-                        length: 3,
-                        child: Column(
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+        body: SafeArea(
+          child: NestedScrollView(
+            headerSliverBuilder: (context, innerBoxIsScrolled) {
+              return [
+                SliverToBoxAdapter(
+                  child: Column(
+                    children: [
+                      // Top bar
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Container(
-                              margin: const EdgeInsets.symmetric(horizontal: 20),
-                              child: TabBar(
-                                labelColor: Colors.black87,
-                                unselectedLabelColor: Colors.grey[500],
-                                indicatorColor: Colors.black87,
-                                indicatorWeight: 2,
-                                labelStyle: const TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 15,
-                                ),
-                                unselectedLabelStyle: const TextStyle(
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 15,
-                                ),
-                                tabs: const [
-                                  Tab(text: "Projects"),
-                                  Tab(text: "About"),
-                                  Tab(text: "Reviews"),
-                                ],
+                            Icon(Icons.arrow_back_ios_new_rounded, size: 22),
+                            Text(
+                              "Profile", 
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
                               ),
                             ),
-                            Expanded( // ใช้ Expanded แทน SizedBox(height: 500)
-                              child: TabBarView(
-                                children: [
-                                  // Projects Tab
-                                  Padding(
-                                    padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
-                                    child: GridView.builder(
-                                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                        crossAxisCount: 2,
-                                        crossAxisSpacing: 16,
-                                        mainAxisSpacing: 20,
-                                        childAspectRatio: 0.75,
-                                      ),
-                                      itemCount: artToys.length,
-                                      itemBuilder: (context, index) => _ArtToyCard(artToys[index]),
-                                    ),
+                            Icon(Icons.more_vert, size: 24),
+                          ],
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 20),
+                      
+                      // Artist Avatar
+                      CircleAvatar(
+                        radius: 55,
+                        backgroundColor: Colors.grey[100],
+                        backgroundImage: AssetImage('assets/images/avatar/profile.png'),
+                        onBackgroundImageError: (exception, stackTrace) {},
+                      ),
+                      const SizedBox(height: 16),
+                      
+                      // Artist Name & Title
+                      Text(
+                        "Guinea P.",
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      
+                      Text(
+                        "Enthusiast",
+                        style: TextStyle(
+                          color: Colors.grey[600], 
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      
+                      // Bio
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 32),
+                        child: Text(
+                          "Based in Bangkok. Love everything gothic, cute, and rebellious!",
+                          style: TextStyle(
+                            color: Colors.grey[700], 
+                            fontSize: 14,
+                            height: 1.5,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      
+                      // Stats Row
+                      Container(
+                        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
+                        margin: const EdgeInsets.symmetric(horizontal: 20),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.05),
+                              blurRadius: 10,
+                              offset: Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            _StatItem(count: "2", label: "Collection"),
+                            _StatDivider(),
+                            _StatItem(count: "3", label: "Years"),
+                            _StatDivider(),
+                            _StatItem(count: "12", label: "Wishlist"),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      
+                      // Action Buttons
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed: () {},
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.black87,
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
                                   ),
-                                  
-                                  // About Tab
-                                  SingleChildScrollView( // เพิ่ม SingleChildScrollView สำหรับ content ที่ยาว
-                                    padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        _AboutSection(
-                                          icon: Icons.favorite_outlined,
-                                          title: "Favorite Characters",
-                                          content: "Kuromi, My Melody, Cinnamoroll, and all Sanrio gothic-cute characters. Special love for limited editions and blind box series",
-                                        ),
-                                        SizedBox(height: 20),
-                                        _AboutSection(
-                                          icon: Icons.location_on_outlined,
-                                          title: "Based in",
-                                          content: "Bangkok, Thailand - Always hunting for rare figures at Siam Center, Central, and online stores",
-                                        ),
-                                        SizedBox(height: 20),
-                                        _AboutSection(
-                                          icon: Icons.collections_outlined,
-                                          title: "Collection Focus",
-                                          content: "Kuromi blind boxes, gothic Sanrio figures, and kawaii dark aesthetic collectibles. Love trading and sharing collection tips!",
-                                        ),
-                                        SizedBox(height: 20),
-                                        _AboutSection(
-                                          icon: Icons.shopping_bag_outlined,
-                                          title: "Where I Shop",
-                                          content: "Central Online, TOPTOY, Lazada, Shopee, and local toy stores. Always looking for good deals and authentic figures!",
-                                        ),
-                                      ],
-                                    ),
+                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  elevation: 0,
+                                ),
+                                child: Text("Edit Profile", style: TextStyle(fontWeight: FontWeight.w600)),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: OutlinedButton(
+                                onPressed: () {},
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: Colors.black87,
+                                  side: BorderSide(color: Colors.grey[300]!),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
                                   ),
-                                  
-                                  // Reviews Tab
-                                  SingleChildScrollView( // เพิ่ม SingleChildScrollView สำหรับ reviews
-                                    padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
-                                    child: Column(
-                                      children: [
-                                        _ReviewItem(
-                                          name: "SanrioCollector_BKK",
-                                          avatar: "assets/images/avatar/avatar1.png",
-                                          rating: 5,
-                                          comment: "Your Kuromi collection is absolutely stunning! I really love how you showcase and review them.",
-                                          date: "2 days ago",
-                                        ),
-                                        _ReviewItem(
-                                          name: "BlindBoxHunter",
-                                          avatar: "assets/images/avatar/avatar2.png",
-                                          rating: 5,
-                                          comment: "Thanks for the trading tips! Finally got my dream Kuromi figure because of your recommendation.",
-                                          date: "1 week ago",
-                                        ),
-                                        _ReviewItem(
-                                          name: "KawaiiGothic",
-                                          avatar: "assets/images/avatar/avatar3.png",
-                                          rating: 4,
-                                          comment: "Love your collection posts! Where did you get that rare Rose Garden Kuromi?",
-                                          date: "2 weeks ago",
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
+                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                ),
+                                child: Text("Share", style: TextStyle(fontWeight: FontWeight.w600)),
                               ),
                             ),
                           ],
                         ),
                       ),
+                      const SizedBox(height: 32),
+                    ],
+                  ),
+                ),
+                SliverPersistentHeader(
+                  pinned: true,
+                  delegate: _SliverAppBarDelegate(
+                    TabBar(
+                      labelColor: Colors.black87,
+                      unselectedLabelColor: Colors.grey[500],
+                      indicatorColor: Colors.black87,
+                      indicatorWeight: 2,
+                      labelStyle: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 15,
+                      ),
+                      unselectedLabelStyle: const TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 15,
+                      ),
+                      tabs: const [
+                        Tab(text: "Projects"),
+                        Tab(text: "About"),
+                        Tab(text: "Reviews"),
+                      ],
+                    ),
+                  ),
+                ),
+              ];
+            },
+            body: TabBarView(
+              children: [
+                // Projects Tab - FIXED: Proper ListView instead of GridView
+                CustomScrollView(
+                  slivers: [
+                    SliverPadding(
+                      padding: const EdgeInsets.all(20),
+                      sliver: SliverGrid(
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 20,
+                          childAspectRatio: 0.75,
+                        ),
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) => _ArtToyCard(artToys[index]),
+                          childCount: artToys.length,
+                        ),
+                      ),
+                    ),
+                    // Add extra space at bottom
+                    SliverToBoxAdapter(
+                      child: SizedBox(height: 80),
                     ),
                   ],
                 ),
-              ),
+                
+                // About Tab
+                SingleChildScrollView(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      _AboutSection(
+                        icon: Icons.favorite_outlined,
+                        title: "Favorite Characters",
+                        content: "Kuromi, My Melody, Cinnamoroll, and all Sanrio gothic-cute characters. Special love for limited editions and blind box series",
+                      ),
+                      SizedBox(height: 20),
+                      _AboutSection(
+                        icon: Icons.location_on_outlined,
+                        title: "Based in",
+                        content: "Bangkok, Thailand - Always hunting for rare figures at Siam Center, Central, and online stores",
+                      ),
+                      SizedBox(height: 20),
+                      _AboutSection(
+                        icon: Icons.collections_outlined,
+                        title: "Collection Focus",
+                        content: "Kuromi blind boxes, gothic Sanrio figures, and kawaii dark aesthetic collectibles. Love trading and sharing collection tips!",
+                      ),
+                      SizedBox(height: 20),
+                      _AboutSection(
+                        icon: Icons.shopping_bag_outlined,
+                        title: "Where I Shop",
+                        content: "Central Online, TOPTOY, Lazada, Shopee, and local toy stores. Always looking for good deals and authentic figures!",
+                      ),
+                      SizedBox(height: 100), // Bottom padding
+                    ],
+                  ),
+                ),
+                
+                // Reviews Tab
+                SingleChildScrollView(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      _ReviewItem(
+                        name: "SanrioCollector_BKK",
+                        avatar: "assets/images/avatar/avatar1.png",
+                        rating: 5,
+                        comment: "Your Kuromi collection is absolutely stunning! I really love how you showcase and review them.",
+                        date: "2 days ago",
+                      ),
+                      _ReviewItem(
+                        name: "BlindBoxHunter",
+                        avatar: "assets/images/avatar/avatar2.png",
+                        rating: 5,
+                        comment: "Thanks for the trading tips! Finally got my dream Kuromi figure because of your recommendation.",
+                        date: "1 week ago",
+                      ),
+                      _ReviewItem(
+                        name: "KawaiiGothic",
+                        avatar: "assets/images/avatar/avatar3.png",
+                        rating: 4,
+                        comment: "Love your collection posts! Where did you get that rare Rose Garden Kuromi?",
+                        date: "2 weeks ago",
+                      ),
+                      SizedBox(height: 100), // Bottom padding
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
+  }
+}
+
+class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
+  _SliverAppBarDelegate(this._tabBar);
+
+  final TabBar _tabBar;
+
+  @override
+  double get minExtent => _tabBar.preferredSize.height;
+  @override
+  double get maxExtent => _tabBar.preferredSize.height;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return Container(
+      color: Colors.white,
+      child: _tabBar,
+    );
+  }
+
+  @override
+  bool shouldRebuild(_SliverAppBarDelegate oldDelegate) {
+    return false;
   }
 }
 
@@ -403,6 +434,13 @@ class _ArtToyCard extends StatelessWidget {
   final ArtToyData artToy;
   
   const _ArtToyCard(this.artToy);
+
+  String _formatNumber(int number) {
+    if (number >= 1000) {
+      return '${(number / 1000).toStringAsFixed(1)}k';
+    }
+    return number.toString();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -463,16 +501,16 @@ class _ArtToyCard extends StatelessWidget {
                       top: 8,
                       left: 8,
                       child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
                           color: Colors.red,
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
                           'LIMITED',
                           style: TextStyle(
                             color: Colors.white, 
-                            fontSize: 9,
+                            fontSize: 8,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -499,7 +537,7 @@ class _ArtToyCard extends StatelessWidget {
               ),
             ),
             
-            // Details
+            // Details - Simplified like Emma cards
             Expanded(
               flex: 2,
               child: Padding(
@@ -511,55 +549,71 @@ class _ArtToyCard extends StatelessWidget {
                       artToy.name, 
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: 15,
+                        fontSize: 14,
                         color: Colors.black87,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 4),
                     Text(
                       artToy.artist,
                       style: TextStyle(
                         color: Colors.grey[600],
                         fontSize: 12,
-                        fontWeight: FontWeight.w500,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 6),
                     Row(
                       children: [
-                        Expanded(
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[100],
+                            borderRadius: BorderRadius.circular(4),
+                          ),
                           child: Text(
-                            artToy.category,
+                            artToy.category.split(',')[0], // Show only first category
                             style: TextStyle(
-                              color: Colors.grey[500],
-                              fontSize: 11,
+                              color: Colors.grey[700],
+                              fontSize: 10,
+                              fontWeight: FontWeight.w500,
                             ),
-                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
+                        const Spacer(),
                         Text(
                           artToy.releaseYear,
                           style: TextStyle(
                             color: Colors.grey[500],
-                            fontSize: 11,
+                            fontSize: 10,
                           ),
                         ),
                       ],
                     ),
                     const Spacer(),
-                    Text(
-                      '${artToy.favorites} likes  ${artToy.collectors} collectors',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 11,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '${_formatNumber(artToy.favorites)} likes',
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        Text(
+                          '${artToy.collectors} collectors',
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -572,8 +626,7 @@ class _ArtToyCard extends StatelessWidget {
   }
 }
 
-// Art Toy Detail Screen
-// Art Toy Detail Screen with Fixed Header Buttons
+// Art Toy Detail Screen remains the same
 class ArtToyDetailScreen extends StatefulWidget {
   final ArtToyData artToy;
 
@@ -586,7 +639,7 @@ class ArtToyDetailScreen extends StatefulWidget {
 class _ArtToyDetailScreenState extends State<ArtToyDetailScreen> {
   final PageController _pageController = PageController();
   int _currentImageIndex = 0;
-  bool isFavorite = false; // Add favorite state
+  bool isFavorite = false;
 
   @override
   void dispose() {
@@ -601,7 +654,7 @@ class _ArtToyDetailScreenState extends State<ArtToyDetailScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Fixed Header with Visible Buttons (same style as home page)
+            // Fixed Header with Visible Buttons
             Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
@@ -690,7 +743,7 @@ class _ArtToyDetailScreenState extends State<ArtToyDetailScreen> {
               ),
             ),
             
-            // Image Indicators (similar to home page style)
+            // Image Indicators
             if (widget.artToy.galleryImages.length > 1)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16),
@@ -713,7 +766,7 @@ class _ArtToyDetailScreenState extends State<ArtToyDetailScreen> {
                 ),
               ),
             
-            // Content (same as home page style)
+            // Content
             Expanded(
               flex: 2,
               child: Container(
@@ -758,7 +811,7 @@ class _ArtToyDetailScreenState extends State<ArtToyDetailScreen> {
                       ),
                       const SizedBox(height: 20),
                       
-                      // Clean Details Table (same as home page)
+                      // Details Table
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(

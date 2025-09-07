@@ -10,7 +10,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
   cupertino_icons: ^1.0.8
   curved_navigation_bar: ^1.0.6
   introduction_screen: ^3.1.17
@@ -20,7 +19,6 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
   flutter_lints: ^5.0.0
 
 flutter:
@@ -56,3 +54,6 @@ flutter:
     - assets/images/witch_feast/witch_feast_1.jpg
     - assets/images/witch_feast/witch_feast_2.jpg
     - assets/images/witch_feast/witch_feast_3.jpg
+    - assets/images/intropic/post3.jpeg
+    - assets/images/intropic/post2.png
+    - assets/images/intropic/post1.png
