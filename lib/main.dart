@@ -25,19 +25,21 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Galleria App',
       home: _getInitialScreen(),
+      routes: {
+        '/login': (context) => const LoginPage(),
+        '/intro': (context) => IntroScreen(),
+        '/home': (context) => const HomeScreen(),
+      },
     );
   }
 
   Widget _getInitialScreen() {
-    // ถ้า login แล้ว ให้เข้าหน้าหลักเลย (ข้าม Onboarding)
-    if (isLoggedIn) {
+    
+    if (isLoggedIn && !showOnboarding) {
       return const HomeScreen();
     }
-    // ถ้ายังไม่เคยดู onboarding ให้แสดง IntroScreen ก่อน
-    else if (showOnboarding) {
-      return IntroScreen();
-    }
-    // ถ้าดู onboarding แล้ว แต่ยังไม่ได้ login ให้แสดงหน้า login
+
+    
     else {
       return const LoginPage();
     }
