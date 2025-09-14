@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // เพิ่ม Firebase Auth
 import 'package:galleria_app/screens/signup_page.dart';
 import 'package:galleria_app/screens/home_screen.dart';
-import 'package:galleria_app/screens/intro_screen.dart'; // เพิ่มบรรทัดนี้
+import 'package:galleria_app/screens/intro_screen.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -119,6 +120,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
     });
   }
 
+  // แก้ไขฟังก์ชัน _login ให้ใช้ Firebase Auth (ตามที่อาจารย์สอน)
   Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
       // Haptic feedback
@@ -127,23 +129,170 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
       setState(() {
         _isLoading = true;
       });
-      // Simulate login process (in real app, connect to API)
-      await Future.delayed(const Duration(seconds: 2));
-      // Save login status
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('IS_LOGGED_IN', true);
-      await prefs.setString('USER_EMAIL', _emailController.text);
-      setState(() {
-        _isLoading = false;
-      });
-      // Success haptic feedback
-      HapticFeedback.mediumImpact();
-      // Navigate to intro screen แทน home screen
+      
+      try {
+        // Firebase Auth Sign In (ตามที่อาจารย์สอน)
+        await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+        );
+        
+        // Save login status
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('IS_LOGGED_IN', true);
+        await prefs.setString('USER_EMAIL', _emailController.text);
+        
+        setState(() {
+          _isLoading = false;
+        });
+        
+        // Success haptic feedback
+        HapticFeedback.mediumImpact();
+        
+        // แสดงข้อความสำเร็จ
+        _showMyDialog('Login successfully.');
+        
+        // Navigate to intro screen หลังจาก login สำเร็จ
+        Future.delayed(const Duration(seconds: 1), () {
+          if (mounted) {
+            Navigator.pushAndRemoveUntil(
+              context,
+              PageRouteBuilder(
+                pageBuilder: (context, animation, secondaryAnimation) => IntroScreen(),
+                transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                  return FadeTransition(
+                    opacity: animation,
+                    child: SlideTransition(
+                      position: Tween<Offset>(
+                        begin: const Offset(0.0, 0.1),
+                        end: Offset.zero,
+                      ).animate(CurvedAnimation(
+                        parent: animation,
+                        curve: Curves.easeOutCubic,
+                      )),
+                      child: child,
+                    ),
+                  );
+                },
+              ),
+              (route) => false,
+            );
+          }
+        });
+        
+      } on FirebaseAuthException catch (e) {
+        setState(() {
+          _isLoading = false;
+        });
+        
+        print('Failed with error code: ${e.code}');
+        print(e.message);
+        
+        // แสดงข้อผิดพลาดตามที่อาจารย์สอน
+        String errorMessage = '';
+        if (e.code == 'invalid-email') {
+          errorMessage = 'No user found for that email.';
+        } else if (e.code == 'user-not-found') {
+          errorMessage = 'No user found for that email.';
+        } else if (e.code == 'wrong-password') {
+          errorMessage = 'Wrong password provided for that user.';
+        } else if (e.code == 'INVALID_LOGIN_CREDENTIALS') {
+          errorMessage = 'Wrong password provided for that user.';
+        } else {
+          errorMessage = 'Login failed. Please try again.';
+        }
+        
+        _showMyDialog(errorMessage);
+        
+      } catch (e) {
+        setState(() {
+          _isLoading = false;
+        });
+        _showMyDialog('An error occurred. Please try again.');
+        print(e);
+      }
+    }
+  }
+
+  // เพิ่มฟังก์ชันแสดง Dialog (ตามที่อาจารย์สอน)
+  void _showMyDialog(String txtMsg) async {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.amberAccent,
+          title: const Text('Galleria App'),
+          content: Text(txtMsg),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.pop(context, 'Cancel'),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, 'OK'),
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // เปลี่ยนฟังก์ชันนี้ให้ไปหน้า SignUpPage แทน
+  Future<void> _navigateToSignUp() async {
+    HapticFeedback.lightImpact();
+    Navigator.push(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            const SignUpPage(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(1.0, 0.0),
+              end: Offset.zero,
+            ).animate(CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeOutCubic,
+            )),
+            child: child,
+          );
+        },
+      ),
+    );
+  }
+
+  Future<void> _socialLogin(String provider) async {
+    HapticFeedback.lightImpact();
+    setState(() {
+      _isLoading = true;
+    });
+    
+    // สำหรับตอนนี้ใช้การจำลองก่อน (Social Login ต้องการ setup เพิ่มเติม)
+    await Future.delayed(const Duration(seconds: 2));
+    
+    // Save login status
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('IS_LOGGED_IN', true);
+    await prefs.setString('USER_EMAIL', '$provider@example.com');
+    await prefs.setString('LOGIN_METHOD', provider);
+    
+    setState(() {
+      _isLoading = false;
+    });
+    
+    // Success haptic feedback
+    HapticFeedback.mediumImpact();
+    
+    _showMyDialog('$provider login successful!');
+    
+    // Navigate to intro screen
+    Future.delayed(const Duration(seconds: 1), () {
       if (mounted) {
         Navigator.pushAndRemoveUntil(
           context,
           PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) => IntroScreen(), // เปลี่ยนจาก HomeScreen เป็น IntroScreen
+            pageBuilder: (context, animation, secondaryAnimation) => IntroScreen(),
             transitionsBuilder: (context, animation, secondaryAnimation, child) {
               return FadeTransition(
                 opacity: animation,
@@ -163,56 +312,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
           (route) => false,
         );
       }
-    }
-  }
-
-  Future<void> _socialLogin(String provider) async {
-    HapticFeedback.lightImpact();
-    setState(() {
-      _isLoading = true;
     });
-    
-    // Simulate social login process
-    await Future.delayed(const Duration(seconds: 2));
-    
-    // Save login status
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('IS_LOGGED_IN', true);
-    await prefs.setString('USER_EMAIL', '$provider@example.com');
-    await prefs.setString('LOGIN_METHOD', provider);
-    
-    setState(() {
-      _isLoading = false;
-    });
-    
-    // Success haptic feedback
-    HapticFeedback.mediumImpact();
-    
-    // Navigate to intro screen แทน home screen
-    if (mounted) {
-      Navigator.pushAndRemoveUntil(
-        context,
-        PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) => IntroScreen(), // เปลี่ยนจาก HomeScreen เป็น IntroScreen
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return FadeTransition(
-              opacity: animation,
-              child: SlideTransition(
-                position: Tween<Offset>(
-                  begin: const Offset(0.0, 0.1),
-                  end: Offset.zero,
-                ).animate(CurvedAnimation(
-                  parent: animation,
-                  curve: Curves.easeOutCubic,
-                )),
-                child: child,
-              ),
-            );
-          },
-        ),
-        (route) => false,
-      );
-    }
   }
 
   @override
@@ -438,6 +538,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                               child: TextButton(
                                                 onPressed: () {
                                                   HapticFeedback.lightImpact();
+                                                  // TODO: Implement forgot password
                                                 },
                                                 style: TextButton.styleFrom(
                                                   padding: const EdgeInsets.symmetric(
@@ -493,7 +594,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                                         ),
                                                       )
                                                     : const Text(
-                                                        'Sign In',
+                                                        'Log In',
                                                         style: TextStyle(
                                                           fontSize: 18,
                                                           fontWeight: FontWeight.bold,
@@ -503,6 +604,33 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                                       ),
                                               ),
                                             ),
+                                            
+                                            // เปลี่ยนปุ่ม Quick Sign Up ให้ไปหน้า SignUpPage
+                                            const SizedBox(height: 16),
+                                            Container(
+                                              width: double.infinity,
+                                              height: 50,
+                                              child: OutlinedButton(
+                                                onPressed: _isLoading ? null : _navigateToSignUp,
+                                                style: OutlinedButton.styleFrom(
+                                                  side: const BorderSide(
+                                                    color: Color(0xFF6366f1),
+                                                    width: 2,
+                                                  ),
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius: BorderRadius.circular(18),
+                                                  ),
+                                                ),
+                                                child: const Text(
+                                                  'Sign Up',
+                                                  style: TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Color(0xFF6366f1),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
                                           ],
                                         ),
                                       ),
@@ -510,7 +638,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                   ),
                                   const SizedBox(height: 32),
                                   
-                                  // Social Login Buttons (Moved here)
+                                  // Social Login Buttons
                                   AnimatedBuilder(
                                     animation: _socialButtonsAnimation,
                                     builder: (context, child) => Transform.scale(
@@ -570,68 +698,8 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(height: 40),
                                   
-                                  // Enhanced Sign Up Link
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 24, vertical: 16),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(20),
-                                      border: Border.all(
-                                        color: Colors.white.withOpacity(0.2),
-                                      ),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(
-                                          "Don't have an account? ",
-                                          style: TextStyle(
-                                            color: Colors.white.withOpacity(0.9),
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w400,
-                                          ),
-                                        ),
-                                        GestureDetector(
-                                          onTap: () {
-                                            HapticFeedback.lightImpact();
-                                            Navigator.push(
-                                              context,
-                                              PageRouteBuilder(
-                                                pageBuilder: (context, animation, secondaryAnimation) =>
-                                                    const SignUpPage(),
-                                                transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                                                  return SlideTransition(
-                                                    position: Tween<Offset>(
-                                                      begin: const Offset(1.0, 0.0),
-                                                      end: Offset.zero,
-                                                    ).animate(CurvedAnimation(
-                                                      parent: animation,
-                                                      curve: Curves.easeOutCubic,
-                                                    )),
-                                                    child: child,
-                                                  );
-                                                },
-                                              ),
-                                            );
-                                          },
-                                          child: const Text(
-                                            'Sign Up',
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                              decoration: TextDecoration.underline,
-                                              decorationColor: Colors.white,
-                                              decorationThickness: 2,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
+                                  // เอาส่วน Sign Up link ด้านล่างออก
                                   SizedBox(height: size.height * 0.05),
                                 ],
                               ),

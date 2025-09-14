@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:galleria_app/screens/home_screen.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -101,6 +102,52 @@ class _SignUpPageState extends State<SignUpPage> with TickerProviderStateMixin {
     _floatingController.repeat(reverse: true);
   }
 
+  // Firebase Authentication Signup Method
+  Future<void> _createUserWithEmailAndPassword() async {
+    try {
+      final credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      );
+      
+      // Update the user profile with display name
+      await credential.user?.updateDisplayName(_nameController.text.trim());
+      
+      // Save additional user data to SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('IS_LOGGED_IN', true);
+      await prefs.setString('USER_EMAIL', _emailController.text.trim());
+      await prefs.setString('USER_NAME', _nameController.text.trim());
+      await prefs.setString('USER_PHONE', '$_selectedCountryCode${_phoneController.text}');
+      
+      return; // Success - no exception thrown
+      
+    } on FirebaseAuthException catch (e) {
+      String errorMessage;
+      
+      switch (e.code) {
+        case 'weak-password':
+          errorMessage = 'The password provided is too weak.';
+          break;
+        case 'email-already-in-use':
+          errorMessage = 'An account already exists for that email.';
+          break;
+        case 'invalid-email':
+          errorMessage = 'The email address is not valid.';
+          break;
+        case 'operation-not-allowed':
+          errorMessage = 'Email/password accounts are not enabled.';
+          break;
+        default:
+          errorMessage = 'An error occurred: ${e.message}';
+      }
+      
+      throw Exception(errorMessage);
+    } catch (e) {
+      throw Exception('An unexpected error occurred. Please try again.');
+    }
+  }
+
   Future<void> _signUp() async {
     if (_formKey.currentState!.validate() && _acceptTerms) {
       // Haptic feedback
@@ -110,48 +157,57 @@ class _SignUpPageState extends State<SignUpPage> with TickerProviderStateMixin {
         _isLoading = true;
       });
 
-      // Simulate registration process (in real app, connect to API)
-      await Future.delayed(const Duration(seconds: 2));
+      try {
+        // Create user with Firebase Authentication
+        await _createUserWithEmailAndPassword();
 
-      // Save login status
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('IS_LOGGED_IN', true);
-      await prefs.setString('USER_EMAIL', _emailController.text);
-      await prefs.setString('USER_NAME', _nameController.text);
-      await prefs.setString('USER_PHONE', '$_selectedCountryCode${_phoneController.text}');
+        setState(() {
+          _isLoading = false;
+        });
 
-      setState(() {
-        _isLoading = false;
-      });
+        // Success haptic feedback
+        HapticFeedback.mediumImpact();
 
-      // Success haptic feedback
-      HapticFeedback.mediumImpact();
+        // Show success dialog
+        _showMyDialog('Account created successfully! Welcome aboard!');
 
-      // Navigate to home screen
-      if (mounted) {
-        Navigator.pushAndRemoveUntil(
-          context,
-          PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) => const HomeScreen(),
-            transitionsBuilder: (context, animation, secondaryAnimation, child) {
-              return FadeTransition(
-                opacity: animation,
-                child: SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(0.0, 0.1),
-                    end: Offset.zero,
-                  ).animate(CurvedAnimation(
-                    parent: animation,
-                    curve: Curves.easeOutCubic,
-                  )),
-                  child: child,
-                ),
-              );
-            },
-          ),
-          (route) => false,
-        );
+        // Navigate to home screen after a short delay
+        await Future.delayed(const Duration(seconds: 1));
+        
+        if (mounted) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            PageRouteBuilder(
+              pageBuilder: (context, animation, secondaryAnimation) => const HomeScreen(),
+              transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                return FadeTransition(
+                  opacity: animation,
+                  child: SlideTransition(
+                    position: Tween<Offset>(
+                      begin: const Offset(0.0, 0.1),
+                      end: Offset.zero,
+                    ).animate(CurvedAnimation(
+                      parent: animation,
+                      curve: Curves.easeOutCubic,
+                    )),
+                    child: child,
+                  ),
+                );
+              },
+            ),
+            (route) => false,
+          );
+        }
+        
+      } catch (e) {
+        setState(() {
+          _isLoading = false;
+        });
+        
+        // Show error dialog
+        _showMyDialog(e.toString().replaceAll('Exception: ', ''));
       }
+      
     } else if (!_acceptTerms) {
       // Show terms error
       ScaffoldMessenger.of(context).showSnackBar(
@@ -163,6 +219,55 @@ class _SignUpPageState extends State<SignUpPage> with TickerProviderStateMixin {
         ),
       );
     }
+  }
+
+  // Enhanced Alert Dialog (similar to the Firebase example)
+  void _showMyDialog(String txtMsg) async {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          title: const Text(
+            'Account Registration',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF1E293B),
+              fontSize: 20,
+            ),
+          ),
+          content: Text(
+            txtMsg,
+            style: const TextStyle(
+              fontSize: 16,
+              color: Color(0xFF64748B),
+              height: 1.5,
+            ),
+          ),
+          actions: <Widget>[
+            Container(
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF6366f1), Color(0xFF8b5cf6)],
+                ),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: TextButton(
+                onPressed: () => Navigator.pop(context, 'OK'),
+                child: const Text(
+                  'OK',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _showTermsDialog() {

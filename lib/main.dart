@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'firebase_options.dart';
 
 import 'screens/home_screen.dart';
 import 'screens/intro_screen.dart';
@@ -10,9 +13,19 @@ bool isLoggedIn = false;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final prefs = await SharedPreferences.getInstance();
+  
+  // Initialize Firebase (ตามที่อาจารย์สอน)
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
   showOnboarding = prefs.getBool('ON_BOARDING') ?? true;
-  isLoggedIn = prefs.getBool('IS_LOGGED_IN') ?? false;
+  
+  // ตรวจสอบว่า user ยัง login อยู่หรือไม่
+  User? currentUser = FirebaseAuth.instance.currentUser;
+  isLoggedIn = currentUser != null;
+  
   runApp(const MyApp());
 }
 
@@ -34,14 +47,17 @@ class MyApp extends StatelessWidget {
   }
 
   Widget _getInitialScreen() {
-    
+    // หาก user ยัง login อยู่ และผ่าน onboarding แล้ว
     if (isLoggedIn && !showOnboarding) {
       return const HomeScreen();
     }
-
-    
+    // หาก user ยัง login อยู่ แต่ยังไม่ผ่าน onboarding
+    else if (isLoggedIn && showOnboarding) {
+      return IntroScreen();
+    }
+    // หาก user ยังไม่ login
     else {
-      return const LoginPage();
+      return showOnboarding ? IntroScreen() : const LoginPage();
     }
   }
 }

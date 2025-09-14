@@ -538,7 +538,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       ),
                       const SizedBox(width: 12),
                       Text(
-                        _isLoggedIn ? 'Sign Out' : 'Sign In',
+                        _isLoggedIn ? 'Log Out' : 'Log In',
                         style: TextStyle(
                           fontWeight: FontWeight.w500,
                           color: _isLoggedIn ? const Color(0xFFEF4444) : const Color(0xFF6366f1),
