@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-
+import '../services/api_service.dart';
+import '../models/product.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -11,141 +12,52 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   String selectedCategory = "All";
   Set<String> favoriteProjects = {};
+  List<Product> products = [];
+  bool isLoading = true;
+  String? errorMessage;
 
-  final List<ArtToyData> artToys = [
-    ArtToyData(
-      id: 'toy_1',
-      image: 'assets/images/pocket_zoo/pocket_zoo_1.jpg',
-      name: 'Emma Pocket Zoo',
-      artist: 'Lucky Emma Studio',
-      favorites: 1245,
-      collectors: '2.3k',
-      category: 'Vinyl',
-      description: 'Emma Pocket Zoo Series featuring adorable miniature zoo animals with Emma character in various cute animal costumes and accessories.',
-      material: 'Soft Vinyl',
-      height: '12 cm',
-      edition: '500 pcs Limited',
-      releaseYear: '2024',
-      studio: 'Yanchuang Culture',
-      location: 'Shenzhen, China',
-      concept: 'Pocket Zoo',
-      galleryImages: [
-        'assets/images/pocket_zoo/pocket_zoo_1.jpg',
-        'assets/images/pocket_zoo/pocket_zoo_2.jpg',
-        'assets/images/pocket_zoo/pocket_zoo_3.jpg',
-      ],
-    ),
-    ArtToyData(
-      id: 'toy_2',
-      image: 'assets/images/rua_rua_zoo/rua_rua_zoo1.jpg',
-      name: 'Emma Rua Rua Zoo',
-      artist: 'Lucky Emma Studio',
-      favorites: 3421,
-      collectors: '5.1k',
-      category: 'PVC',
-      description: 'Emma Rua Rua Zoo collection with zoo theme featuring Emma in various animal forms with playful designs and vibrant colors.',
-      material: 'PVC',
-      height: '9 cm',
-      edition: 'Blind Box Series',
-      releaseYear: '2024',
-      studio: 'Yanchuang Culture',
-      location: 'Shenzhen, China',
-      concept: 'Zoo Adventure',
-      galleryImages: [
-        'assets/images/rua_rua_zoo/rua_rua_zoo1.jpg',
-        'assets/images/rua_rua_zoo/rua_rua_zoo2.jpg',
-        'assets/images/rua_rua_zoo/rua_rua_zoo3.jpg',
-      ],
-    ),
-    ArtToyData(
-      id: 'toy_3',
-      image: 'assets/images/secret_forest/secret_forest_1.jpg',
-      name: 'Emma Secret Forest',
-      artist: 'Lucky Emma Studio',
-      favorites: 8967,
-      collectors: '12k',
-      category: 'Vinyl',
-      description: 'Emma Secret Forest series featuring Emma in a magical woodland setting, with whimsical outfits, forest creatures, and enchanting party themes.',
-      material: 'Vinyl',
-      height: '28 cm',
-      edition: '1000 pcs Worldwide',
-      releaseYear: '2023',
-      studio: 'Yanchuang Culture',
-      location: 'Shenzhen, China',
-      concept: 'Secret Forest - Birthday Party',
-      galleryImages: [
-        'assets/images/secret_forest/secret_forest_1.jpg',
-        'assets/images/secret_forest/secret_forest_2.jpg',
-        'assets/images/secret_forest/secret_forest_3.jpg',
-      ],
-    ),
-    ArtToyData(
-      id: 'toy_4',
-      image: 'assets/images/tea_party/tea_party_1.jpg',
-      name: 'Emma Tea Party',
-      artist: 'Lucky Emma Studio',
-      favorites: 2156,
-      collectors: '3.2k',
-      category: 'Resin',
-      description: 'Emma Tea Party collection featuring elegant afternoon tea themes with delicate sweets, teacups, and garden-inspired outfits.',
-      material: 'Cast Resin',
-      height: '15 cm',
-      edition: '300 pcs Limited',
-      releaseYear: '2024',
-      studio: 'Yanchuang Culture',
-      location: 'Shenzhen, China',
-      concept: 'Party Celebration',
-      galleryImages: [
-        'assets/images/tea_party/tea_party_1.jpg',
-        'assets/images/tea_party/tea_party_2.jpg',
-        'assets/images/tea_party/tea_party_3.jpg',
-      ],
-    ),
-    ArtToyData(
-      id: 'toy_5',
-      image: 'assets/images/bunny_collector/bunny_collector_1.jpg',
-      name: 'Emma Bunny Collector',
-      artist: 'Lucky Emma Studio',
-      favorites: 4521,
-      collectors: '6.8k',
-      category: 'Sofubi',
-      description: 'Emma Daily Life series showcasing Emma in everyday scenarios with casual outfits and lifestyle accessories.',
-      material: 'Sofubi',
-      height: '8 cm',
-      edition: 'Open Edition',
-      releaseYear: '2024',
-      studio: 'Yanchuang Culture',
-      location: 'Shenzhen, China',
-      concept: 'Daily Life',
-      galleryImages: [
-        'assets/images/bunny_collector/bunny_collector_1.jpg',
-        'assets/images/bunny_collector/bunny_collector_2.jpg',
-        'assets/images/bunny_collector/bunny_collector_3.jpg',
-      ],
-    ),
-    ArtToyData(
-      id: 'toy_6',
-      image: 'assets/images/beloved/beloved_1.jpg',
-      name: 'Emma Beloved Series',
-      artist: 'Lucky Emma Studio',
-      favorites: 1876,
-      collectors: '4.1k',
-      category: 'PVC',
-      description: 'Emma Forest Friends collection featuring woodland creatures with Emma in nature-inspired outfits and forest accessories.',
-      material: 'PVC + Metal',
-      height: '20 cm',
-      edition: '777 pcs Limited',
-      releaseYear: '2023',
-      studio: 'Yanchuang Culture',
-      location: 'Shenzhen, China',
-      concept: 'Forest Adventure',
-      galleryImages: [
-        'assets/images/beloved/beloved_1.jpg',
-        'assets/images/beloved/beloved_2.jpg',
-        'assets/images/beloved/beloved_3.jpg',
-      ],
-    ),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _loadProducts();
+  }
+
+  Future<void> _loadProducts() async {
+    try {
+      setState(() {
+        isLoading = true;
+        errorMessage = null;
+      });
+
+      // Try to get data from API first with shorter timeout
+      try {
+        final apiProducts = await ApiService().getProducts();
+        if (mounted) {
+          setState(() {
+            products = apiProducts;
+            isLoading = false;
+          });
+        }
+      } catch (e) {
+        // If API fails, use mock data immediately
+        print('API failed, using mock data: $e');
+        final mockProducts = ApiService.getMockProducts();
+        if (mounted) {
+          setState(() {
+            products = mockProducts;
+            isLoading = false;
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          errorMessage = 'Failed to load products: $e';
+          isLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -170,11 +82,47 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             
-            // Art Toys Grid
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-              sliver: _buildArtToysSliver(),
-            ),
+            // Loading, Error, or Products Grid
+            if (isLoading)
+              const SliverToBoxAdapter(
+                child: Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(50),
+                    child: CircularProgressIndicator(
+                      color: Colors.pink,
+                    ),
+                  ),
+                ),
+              )
+            else if (errorMessage != null)
+              SliverToBoxAdapter(
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      children: [
+                        Icon(Icons.error_outline, size: 60, color: Colors.grey[400]),
+                        const SizedBox(height: 16),
+                        Text(
+                          errorMessage!,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.grey[600]),
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: _loadProducts,
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              )
+            else
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                sliver: _buildProductsSliver(),
+              ),
             
             // Bottom Spacing
             const SliverToBoxAdapter(
@@ -210,7 +158,7 @@ class _HomePageState extends State<HomePage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    "EMMA GALLERY",
+                    "ART GALLERY",
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -219,7 +167,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    "Lucky Emma Studio Collections",
+                    "Art Collections & Products",
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.grey[600],
@@ -230,11 +178,11 @@ class _HomePageState extends State<HomePage> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.pink.withValues(alpha:0.1),
+                  color: Colors.pink.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
-                  Icons.toys,
+                  Icons.palette,
                   color: Colors.pink,
                   size: 24,
                 ),
@@ -250,7 +198,7 @@ class _HomePageState extends State<HomePage> {
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
-              "Discover Emma collections from Yanchuang Culture",
+              "Discover beautiful art collections and products",
               style: TextStyle(
                 color: Colors.grey[700],
                 fontSize: 13,
@@ -263,13 +211,13 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildCategoryTabs() {
-    final categories = ["All", "Vinyl", "PVC", "Resin", "Sofubi"];
+    final categories = ["All", "Gallery", "Collection", "Limited"];
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          "Browse by Material",
+          "Browse Collections",
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
@@ -287,7 +235,7 @@ class _HomePageState extends State<HomePage> {
               final isSelected = selectedCategory == category;
               
               return Padding(
-                padding: EdgeInsets.only(right: 12),
+                padding: const EdgeInsets.only(right: 12),
                 child: GestureDetector(
                   onTap: () {
                     setState(() {
@@ -321,12 +269,23 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildArtToysSliver() {
-    List<ArtToyData> filteredToys = artToys;
+  Widget _buildProductsSliver() {
+    List<Product> filteredProducts = products;
     if (selectedCategory != "All") {
-      filteredToys = artToys.where((toy) => 
-        toy.category == selectedCategory
-      ).toList();
+      // Simple filtering based on name keywords
+      filteredProducts = products.where((product) {
+        final name = product.name.toLowerCase();
+        switch (selectedCategory) {
+          case "Gallery":
+            return name.contains('gallery') || name.contains('art');
+          case "Collection":
+            return name.contains('collection') || name.contains('series');
+          case "Limited":
+            return name.contains('limited') || name.contains('mystery');
+          default:
+            return true;
+        }
+      }).toList();
     }
 
     return SliverGrid(
@@ -338,54 +297,54 @@ class _HomePageState extends State<HomePage> {
       ),
       delegate: SliverChildBuilderDelegate(
         (context, index) {
-          final toy = filteredToys[index];
-          final isFavorite = favoriteProjects.contains(toy.id);
+          final product = filteredProducts[index];
+          final isFavorite = favoriteProjects.contains(product.id.toString());
           
-          return _SimpleArtToyCard(
-            toy: toy,
+          return _SimpleProductCard(
+            product: product,
             isFavorite: isFavorite,
             onFavoriteTap: () {
               setState(() {
                 if (isFavorite) {
-                  favoriteProjects.remove(toy.id);
+                  favoriteProjects.remove(product.id.toString());
                 } else {
-                  favoriteProjects.add(toy.id);
+                  favoriteProjects.add(product.id.toString());
                 }
               });
             },
-            onToyTap: () {
+            onProductTap: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ArtToyDetailPage(toy: toy),
+                  builder: (context) => ProductDetailPage(product: product),
                 ),
               );
             },
           );
         },
-        childCount: filteredToys.length,
+        childCount: filteredProducts.length,
       ),
     );
   }
 }
 
-class _SimpleArtToyCard extends StatelessWidget {
-  final ArtToyData toy;
+class _SimpleProductCard extends StatelessWidget {
+  final Product product;
   final bool isFavorite;
   final VoidCallback onFavoriteTap;
-  final VoidCallback onToyTap;
+  final VoidCallback onProductTap;
 
-  const _SimpleArtToyCard({
-    required this.toy,
+  const _SimpleProductCard({
+    required this.product,
     required this.isFavorite,
     required this.onFavoriteTap,
-    required this.onToyTap,
+    required this.onProductTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onToyTap,
+      onTap: onProductTap,
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
@@ -407,7 +366,7 @@ class _SimpleArtToyCard extends StatelessWidget {
                 ClipRRect(
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
                   child: Image.asset(
-                    toy.image,
+                    product.mainImage,
                     height: 120,
                     width: double.infinity,
                     fit: BoxFit.cover,
@@ -416,7 +375,7 @@ class _SimpleArtToyCard extends StatelessWidget {
                         height: 120,
                         color: Colors.grey[100],
                         child: const Center(
-                          child: Icon(Icons.toys, color: Colors.grey, size: 40),
+                          child: Icon(Icons.image, color: Colors.grey, size: 40),
                         ),
                       );
                     },
@@ -441,26 +400,6 @@ class _SimpleArtToyCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                if (toy.edition.contains('Limited'))
-                  Positioned(
-                    top: 8,
-                    left: 8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Colors.red,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: const Text(
-                        'LIMITED',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 8,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
               ],
             ),
             
@@ -472,7 +411,7 @@ class _SimpleArtToyCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      toy.name,
+                      product.name,
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
@@ -483,7 +422,7 @@ class _SimpleArtToyCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      toy.artist,
+                      'ID: ${product.id}',
                       style: TextStyle(
                         color: Colors.grey[600],
                         fontSize: 12,
@@ -491,55 +430,14 @@ class _SimpleArtToyCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 6),
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: Colors.grey[100],
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            toy.category,
-                            style: TextStyle(
-                              color: Colors.grey[700],
-                              fontSize: 10,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                        const Spacer(),
-                        Text(
-                          toy.releaseYear,
-                          style: TextStyle(
-                            color: Colors.grey[500],
-                            fontSize: 10,
-                          ),
-                        ),
-                      ],
-                    ),
                     const Spacer(),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          '${_formatNumber(toy.favorites)} likes',
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        Text(
-                          '${toy.collectors} collectors',
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
+                    Text(
+                      '\$${product.price.toStringAsFixed(2)}',
+                      style: const TextStyle(
+                        color: Colors.pink,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ],
                 ),
@@ -550,67 +448,21 @@ class _SimpleArtToyCard extends StatelessWidget {
       ),
     );
   }
-
-  String _formatNumber(int number) {
-    if (number >= 1000) {
-      return '${(number / 1000).toStringAsFixed(1)}k';
-    }
-    return number.toString();
-  }
 }
 
-// Keep all existing classes: ArtToyData, ArtToyDetailPage, etc.
-class ArtToyData {
-  final String id;
-  final String image;
-  final String name;
-  final String artist;
-  final int favorites;
-  final String collectors;
-  final String category;
-  final String description;
-  final String material;
-  final String height;
-  final String edition;
-  final String releaseYear;
-  final String studio;
-  final String location;
-  final String concept;
-  final List<String> galleryImages;
+class ProductDetailPage extends StatefulWidget {
+  final Product product;
 
-  ArtToyData({
-    required this.id,
-    required this.image,
-    required this.name,
-    required this.artist,
-    required this.favorites,
-    required this.collectors,
-    required this.category,
-    required this.description,
-    required this.material,
-    required this.height,
-    required this.edition,
-    required this.releaseYear,
-    required this.studio,
-    required this.location,
-    required this.concept,
-    required this.galleryImages,
-  });
-}
-
-class ArtToyDetailPage extends StatefulWidget {
-  final ArtToyData toy;
-
-  const ArtToyDetailPage({super.key, required this.toy});
+  const ProductDetailPage({super.key, required this.product});
 
   @override
-  State<ArtToyDetailPage> createState() => _ArtToyDetailPageState();
+  State<ProductDetailPage> createState() => _ProductDetailPageState();
 }
 
-class _ArtToyDetailPageState extends State<ArtToyDetailPage> {
+class _ProductDetailPageState extends State<ProductDetailPage> {
   PageController pageController = PageController();
   int currentImageIndex = 0;
-  bool isFollowing = false;
+  bool isFavorite = false;
 
   @override
   void dispose() {
@@ -621,11 +473,11 @@ class _ArtToyDetailPageState extends State<ArtToyDetailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
           children: [
-            // Simplified Header
+            // Header
             Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
@@ -644,8 +496,13 @@ class _ArtToyDetailPageState extends State<ArtToyDetailPage> {
                   ),
                   GestureDetector(
                     onTap: () {
+                      setState(() {
+                        isFavorite = !isFavorite;
+                      });
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Added to wishlist!')),
+                        SnackBar(
+                          content: Text(isFavorite ? 'Added to favorites!' : 'Removed from favorites!'),
+                        ),
                       );
                     },
                     child: Container(
@@ -654,7 +511,11 @@ class _ArtToyDetailPageState extends State<ArtToyDetailPage> {
                         color: Colors.black54,
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Icon(Icons.favorite_border, color: Colors.white, size: 20),
+                      child: Icon(
+                        isFavorite ? Icons.favorite : Icons.favorite_border,
+                        color: isFavorite ? Colors.red : Colors.white,
+                        size: 20,
+                      ),
                     ),
                   ),
                 ],
@@ -664,66 +525,77 @@ class _ArtToyDetailPageState extends State<ArtToyDetailPage> {
             // Image Gallery
             Expanded(
               flex: 3,
-              child: PageView.builder(
-                controller: pageController,
-                onPageChanged: (index) {
-                  setState(() {
-                    currentImageIndex = index;
-                  });
-                },
-                itemCount: widget.toy.galleryImages.length,
-                itemBuilder: (context, index) {
-                  return Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 16),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.asset(
-                        widget.toy.galleryImages[index],
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            color: Colors.grey[800],
-                            child: const Center(
-                              child: Icon(Icons.toys, color: Colors.white, size: 60),
-                            ),
-                          );
-                        },
+              child: widget.product.images.isEmpty
+                  ? Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        borderRadius: BorderRadius.circular(12),
                       ),
+                      child: const Center(
+                        child: Icon(Icons.image, color: Colors.grey, size: 60),
+                      ),
+                    )
+                  : PageView.builder(
+                      controller: pageController,
+                      onPageChanged: (index) {
+                        setState(() {
+                          currentImageIndex = index;
+                        });
+                      },
+                      itemCount: widget.product.images.length,
+                      itemBuilder: (context, index) {
+                        return Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 16),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.asset(
+                              widget.product.images[index],
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  color: Colors.grey[200],
+                                  child: const Center(
+                                    child: Icon(Icons.image, color: Colors.grey, size: 60),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        );
+                      },
                     ),
-                  );
-                },
-              ),
             ),
             
-            // Simple Image Indicators
-            if (widget.toy.galleryImages.length > 1)
+            // Image Indicators
+            if (widget.product.images.length > 1)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: List.generate(
-                    widget.toy.galleryImages.length,
+                    widget.product.images.length,
                     (index) => Container(
                       margin: const EdgeInsets.symmetric(horizontal: 3),
                       width: 6,
                       height: 6,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: currentImageIndex == index ? Colors.white : Colors.white38,
+                        color: currentImageIndex == index ? Colors.pink : Colors.grey.shade300,
                       ),
                     ),
                   ),
                 ),
               ),
             
-            // Clean Details Section
+            // Product Details
             Expanded(
               flex: 2,
               child: Container(
                 width: double.infinity,
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                decoration: BoxDecoration(
+                  color: Colors.grey[50],
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
                 ),
                 padding: const EdgeInsets.all(24),
                 child: SingleChildScrollView(
@@ -731,7 +603,7 @@ class _ArtToyDetailPageState extends State<ArtToyDetailPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        widget.toy.name,
+                        widget.product.name,
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -740,7 +612,7 @@ class _ArtToyDetailPageState extends State<ArtToyDetailPage> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        widget.toy.artist,
+                        'Product ID: ${widget.product.id}',
                         style: const TextStyle(
                           color: Colors.black54,
                           fontSize: 14,
@@ -749,63 +621,51 @@ class _ArtToyDetailPageState extends State<ArtToyDetailPage> {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        widget.toy.description,
+                        '\$${widget.product.price.toStringAsFixed(2)}',
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.pink,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        widget.product.detail,
                         style: const TextStyle(
                           color: Colors.black87,
                           fontSize: 14,
                           height: 1.5,
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 24),
                       
-                      // Clean Details Table
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[50],
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Column(
-                          children: [
-                            _buildDetailRow('Material', widget.toy.material),
-                            _buildDetailRow('Height', widget.toy.height),
-                            _buildDetailRow('Edition', widget.toy.edition),
-                            _buildDetailRow('Release', widget.toy.releaseYear),
-                            _buildDetailRow('Studio', widget.toy.studio),
-                            _buildDetailRow('Location', widget.toy.location),
-                          ],
-                        ),
-                      ),
-                      
-                      const SizedBox(height: 20),
-                      
-                      Text(
-                        '${widget.toy.collectors} collectors • ${widget.toy.favorites} favorites',
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 13,
-                        ),
-                      ),
-                      
-                      const SizedBox(height: 20),
-                      
+                      // Add to Cart Button
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: isFollowing ? Colors.grey[300] : Colors.pink,
-                            foregroundColor: isFollowing ? Colors.black87 : Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            backgroundColor: Colors.pink,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
                           onPressed: () {
-                            setState(() {
-                              isFollowing = !isFollowing;
-                            });
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Added to cart!'),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
                           },
-                          child: Text(isFollowing ? "Following" : "Follow Artist"),
+                          child: const Text(
+                            'Add to Cart',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ),
                       ),
                     ],
@@ -815,35 +675,6 @@ class _ArtToyDetailPageState extends State<ArtToyDetailPage> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildDetailRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 70,
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 13,
-              color: Colors.black87,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
       ),
     );
   }

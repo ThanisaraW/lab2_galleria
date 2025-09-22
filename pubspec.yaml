@@ -1,5 +1,5 @@
 name: galleria_app
-description: "A new Flutter project."
+description: "A Flutter Art Gallery app with Firebase integration."
 publish_to: 'none'
 
 version: 1.0.0+1
@@ -15,13 +15,14 @@ dependencies:
   introduction_screen: ^3.1.17
   smooth_page_indicator: ^1.2.1
   shared_preferences: ^2.5.3
+  http: ^1.1.2
+  cached_network_image: ^3.3.0
   
-  # Firebase Dependencies (เวอร์ชันที่เข้ากันได้)
-  firebase_core: ^2.32.0
-  firebase_auth: ^4.20.0
-  cloud_firestore: ^4.17.5
-  firebase_storage: ^11.7.7
-  firebase_analytics: ^10.10.7
+  # Firebase Dependencies (latest stable versions)
+  firebase_core: ^2.24.2
+  firebase_auth: ^4.15.3
+  cloud_firestore: ^4.13.6
+  firebase_storage: ^11.5.4
 
 dev_dependencies:
   flutter_test:
